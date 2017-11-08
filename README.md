@@ -1,6 +1,6 @@
 # go-codewars
 
-This is a Golang language pack for [Russian AI Cup 2016](http://russianaicup.ru/)
+This is a Golang language pack for [Russian AI Cup 2017](http://russianaicup.ru/)
 
 ## How to use
 
