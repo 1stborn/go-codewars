@@ -141,7 +141,3 @@ type Vehicle struct {
 	 */
 	Groups []int
 }
-
-func (v *Vehicle) Update() {
-
-}

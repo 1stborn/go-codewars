@@ -1,8 +1,8 @@
 package codewars
 
 import (
-	"errors"
 	"codewars/model"
+	"errors"
 )
 
 type MessageType byte
@@ -64,10 +64,11 @@ func Start(s Strategy, args ...string) {
 		cli.ReadTeamSize()
 
 		s.NewGame(cli.readGame())
-		m := new(model.Move)
 		for cli.readContext(s.GetWorld()) == nil {
+			m := model.NewMove()
+			s.Move(m)
 			cli.writeMove(m)
-			m.Reset()
+			m.Release()
 		}
 	} else {
 		panic(err)
@@ -299,7 +300,7 @@ func (c *CodeWars) readFacility(fn func(id int64) *model.Facility) {
 	}
 }
 
-func (c *CodeWars) readVehicleUpdate(fn func(id int64) *model.Vehicle) {
+func (c *CodeWars) readVehicleUpdate(fn func(id int64) *model.Vehicle) *model.Vehicle {
 	if c.readBool() {
 		v := fn(c.readInt64())
 		v.X = c.readFloat64()
@@ -308,8 +309,11 @@ func (c *CodeWars) readVehicleUpdate(fn func(id int64) *model.Vehicle) {
 		v.RemainingAttackCooldownTicks = c.readInt()
 		v.Selected = c.readBool()
 		v.Groups = c.readIntArray()
-		v.Update()
+
+		return v
 	}
+
+	return nil
 }
 
 func (c *CodeWars) readVehicle(fn func(id int64) *model.Vehicle) {
@@ -342,8 +346,11 @@ func (c *CodeWars) readVehicle(fn func(id int64) *model.Vehicle) {
 }
 
 func (c *CodeWars) readVehiclesUpdate(w *model.World) {
+	w.Updates = w.Updates[:0]
 	for l := c.readInt(); l > 0; l-- {
-		c.readVehicleUpdate(w.Vehicle)
+		if v := c.readVehicleUpdate(w.Vehicle); v != nil {
+			w.Updates = append(w.Updates, v.Id)
+		}
 	}
 }
 

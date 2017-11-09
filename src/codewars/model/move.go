@@ -1,5 +1,7 @@
 package model
 
+import "sync"
+
 /**
  * Стратегия игрока может управлять юнитами посредством установки свойств объекта данного класса.
  */
@@ -145,6 +147,23 @@ type Move struct {
 	FacilityId int64
 }
 
+var movesPool sync.Pool
+
+func init() {
+	movesPool.New = func() interface{} {
+		m := new(Move)
+		m.VehicleType = Vehicle_None
+		m.Action = Action_None
+		return m
+	}
+}
+
+func NewMove() (m *Move) {
+	m = movesPool.Get().(*Move)
+	m.Reset()
+	return
+}
+
 func (m *Move) Reset() {
 	m.Action = Action_None
 	m.Group = 0
@@ -159,4 +178,15 @@ func (m *Move) Reset() {
 	m.MaxAngularSpeed = 0
 	m.VehicleType = Vehicle_None
 	m.FacilityId = 0
+}
+
+func (m *Move) Release() {
+	movesPool.Put(m)
+}
+
+func (m *Move) SelectRect(x, y, width, height float64) {
+	m.Left = x
+	m.Top = y
+	m.Right = x + width
+	m.Bottom = y + height
 }
