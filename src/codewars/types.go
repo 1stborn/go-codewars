@@ -1,4 +1,4 @@
-package model
+package codewars
 
 /**
  * Возможные действия игрока.

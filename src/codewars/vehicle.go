@@ -1,14 +1,4 @@
-package model
-
-import "sync"
-
-var vehiclePool sync.Pool
-
-func init() {
-	vehiclePool.New = func() interface{} {
-		return new(Vehicle)
-	}
-}
+package codewars
 
 /**
  * Класс, частично определяющий технику. Содержит уникальный идентификатор техники, а также все поля техники,
@@ -127,7 +117,7 @@ type Vehicle struct {
 	/**
 	 * Тип техники.
 	 */
-	VehicleType VehicleType
+	Type VehicleType
 	/**
 	 * {@code true} в том и только том случае, если эта техника воздушная.
 	 */

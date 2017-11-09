@@ -1,4 +1,4 @@
-package model
+package codewars
 
 import "sync"
 
@@ -15,7 +15,7 @@ type Move struct {
 	 * <p>
 	 * Является опциональным параметром для действий {@code ActionType.CLEAR_AND_SELECT},
 	 * {@code ActionType.ADD_TO_SELECTION} и {@code ActionType.DESELECT}. Если для этих действий группа юнитов
-	 * установлена, то параметр {@code VehicleType}, а также параметры прямоугольной рамки {@code Left}, {@code Top},
+	 * установлена, то параметр {@code Type}, а также параметры прямоугольной рамки {@code Left}, {@code Top},
 	 * {@code Right} и {@code Bottom} будут проигнорированы.
 	 * <p>
 	 * Является обязательным параметром для действий {@code ActionType.ASSIGN}, {@code ActionType.DISMISS} и
@@ -145,48 +145,4 @@ type Move struct {
 	 * ({@code FacilityType.VEHICLE_FACTORY}) или принадлежит другому игроку, то действие будет проигнорировано.
 	 */
 	FacilityId int64
-}
-
-var movesPool sync.Pool
-
-func init() {
-	movesPool.New = func() interface{} {
-		m := new(Move)
-		m.VehicleType = Vehicle_None
-		m.Action = Action_None
-		return m
-	}
-}
-
-func NewMove() (m *Move) {
-	m = movesPool.Get().(*Move)
-	m.Reset()
-	return
-}
-
-func (m *Move) Reset() {
-	m.Action = Action_None
-	m.Group = 0
-	m.Left = 0
-	m.Right = 0
-	m.Top = 0
-	m.Bottom = 0
-	m.X = 0
-	m.Y = 0
-	m.Angle = 0
-	m.MaxSpeed = 0
-	m.MaxAngularSpeed = 0
-	m.VehicleType = Vehicle_None
-	m.FacilityId = 0
-}
-
-func (m *Move) Release() {
-	movesPool.Put(m)
-}
-
-func (m *Move) SelectRect(x, y, width, height float64) {
-	m.Left = x
-	m.Top = y
-	m.Right = x + width
-	m.Bottom = y + height
 }

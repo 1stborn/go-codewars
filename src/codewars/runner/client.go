@@ -1,8 +1,9 @@
-package codewars
+package runner
 
 import (
-	"codewars/model"
+	"codewars"
 	"errors"
+	"time"
 )
 
 type MessageType byte
@@ -26,16 +27,16 @@ const Version int = 1
  * Может отсутствовать в некоторых языковых пакетах, если язык не поддерживает интерфейсы.
  */
 type Strategy interface {
-	/**
-	 * Основной метод стратегии, осуществляющий управление армией. Вызывается каждый тик.
-	 */
-	Move(*model.Move)
 
-	NewGame(*model.Game)
 	/**
-	 * @param world Текущее состояние мира.
-	 */
-	GetWorld() *model.World
+		 * Основной метод стратегии, осуществляющий управление армией. Вызывается каждый тик.
+		 *
+	     * me    Информация о вашем игроке.
+	     * world Текущее состояние мира.
+	     * game  Различные игровые константы.
+	     * move  Результатом работы метода является изменение полей данного объекта.
+	*/
+	Move(*codewars.Player, *codewars.World, *codewars.Game, *codewars.Move)
 }
 
 const DefaultHost = "127.0.0.1"
@@ -44,6 +45,12 @@ const DefaultToken = "0000000000000000"
 
 type CodeWars struct {
 	*AiCup
+
+	players    map[int64]*codewars.Player
+	facilities map[int64]*codewars.Facility
+
+	terrainByCellXY [][]codewars.TerrainType
+	weatherByCellXY [][]codewars.WeatherType
 }
 
 func Start(s Strategy, args ...string) {
@@ -55,31 +62,45 @@ func Start(s Strategy, args ...string) {
 		host, port, token = DefaultHost, DefaultPort, DefaultToken
 	}
 
-	cli := &CodeWars{new(AiCup)}
-
-	if err := cli.Dial(host, port); err == nil {
-		defer cli.Close()
-		cli.writeToken(token)
-		cli.writeProtoVersion(Version)
-		cli.ReadTeamSize()
-
-		s.NewGame(cli.readGame())
-		for cli.readContext(s.GetWorld()) == nil {
-			m := model.NewMove()
-			s.Move(m)
-			cli.writeMove(m)
-			m.Release()
-		}
-	} else {
-		panic(err)
+	cli := &CodeWars{
+		AiCup:      new(AiCup),
+		players:    make(map[int64]*codewars.Player),
+		facilities: make(map[int64]*codewars.Facility),
 	}
+
+	for {
+		if err := cli.Dial(host, port); err == nil {
+			cli.writeToken(token)
+			cli.writeProtoVersion(Version)
+			cli.ReadTeamSize()
+
+			g := cli.readGame()
+
+			for {
+				p, w, err := cli.readContext()
+				if err != ErrGameOver {
+					m := new(codewars.Move)
+					m.VehicleType = codewars.Vehicle_None
+					m.Action = codewars.Action_None
+
+					s.Move(p, w, g, m)
+					cli.writeMove(m)
+				}
+			}
+
+			cli.Close()
+		} else {
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+
 }
 
-func (c *CodeWars) readGame() *model.Game {
+func (c *CodeWars) readGame() *codewars.Game {
 	c.ensureMessageType(GameContext)
 
 	if c.readBool() {
-		return &model.Game{
+		return &codewars.Game{
 			RandomSeed:                             c.readInt64(),
 			TickCount:                              c.readInt(),
 			WorldWidth:                             c.readFloat64(),
@@ -177,51 +198,56 @@ func (c *CodeWars) readGame() *model.Game {
 
 var ErrGameOver = errors.New("game over")
 
-func (c *CodeWars) readContext(w *model.World) error {
+func (c *CodeWars) readContext() (*codewars.Player, *codewars.World, error) {
 	switch c.readOpcode() {
 	case GameOver:
-		return ErrGameOver
+		return nil, nil, ErrGameOver
 	case PlayerContext:
 		if c.readBool() {
-			c.readPlayer(w.Player)
-			c.readWorld(w)
+			return c.readPlayer(), c.readWorld(), nil
+		} else {
+			return nil, nil, nil
 		}
-		return nil
 	default:
-		return ErrWrongType
+		return nil, nil, ErrWrongType
 	}
 }
 
-func (c *CodeWars) readPlayer(fn func(id int64) *model.Player) {
+func (c *CodeWars) readPlayer() *codewars.Player {
 	switch c.readByte() {
 	case 0:
-		return
+		return nil
 	case 127:
-		c.readInt64() // consume id, no changes
+		return c.players[c.readInt64()] // consume id, no changes
 	default:
-		p := fn(c.readInt64())
-		p.Me = c.readBool()
-		p.StrategyCrashed = c.readBool()
-		p.Score = c.readInt()
-		p.RemainingActionCooldownTicks = c.readInt()
+		p := &codewars.Player{
+			Id:              c.readInt64(),
+			Me:              c.readBool(),
+			StrategyCrashed: c.readBool(),
+			Score:           c.readInt(),
+			RemainingActionCooldownTicks: c.readInt(),
+		}
+
+		c.players[p.Id] = p
+
+		return p
 	}
 }
 
-func (c *CodeWars) readWorld(w *model.World) {
+func (c *CodeWars) readWorld() *codewars.World {
 	if c.readBool() {
+		w := new(codewars.World)
+
 		w.TickIndex = c.readInt()
 		w.TickCount = c.readInt()
 		w.Width = c.readFloat64()
 		w.Height = c.readFloat64()
-		w.LineSize = int(w.Height) / model.TileSize
 
 		c.readPlayers(w)
 		c.readVehicles(w)       // New
 		c.readVehiclesUpdate(w) // Updates
 
-		if len(w.Land) == 0 {
-			w.Land = make([]model.LandType, int(w.Width*w.Height)/(model.TileSize*model.TileSize))
-
+		if w.TickIndex == 0 {
 			c.readTerrains(w)
 			c.readWeather(w)
 		}
@@ -230,7 +256,7 @@ func (c *CodeWars) readWorld(w *model.World) {
 	}
 }
 
-func (c *CodeWars) writeMove(m *model.Move) {
+func (c *CodeWars) writeMove(m *runner.Move) {
 	c.writeOpcode(Move)
 
 	c.writeBool(true)
@@ -252,55 +278,46 @@ func (c *CodeWars) writeMove(m *model.Move) {
 	c.flush()
 }
 
-func (c *CodeWars) readWeather(w *model.World) {
-	idx := 0
+func (c *CodeWars) readWeather() (weather [][]codewars.WeatherType) {
 	for i := c.readInt(); i > 0; i-- {
+		var slice []codewars.WeatherType
 		for j := c.readInt(); j > 0; j-- {
-			w.Land[idx] = w.Land[idx] & ^(model.Land_Rain | model.Land_Cloud)
-			switch c.readByte() {
-			case byte(model.Weather_Rain):
-				w.Land[idx] |= model.Land_Rain
-			case byte(model.Weather_Cloud):
-				w.Land[idx] |= model.Land_Cloud
-			}
-			idx++
+			slice = append(slice, codewars.WeatherType(c.readByte()))
 		}
+		weather = append(weather, slice)
 	}
+
+	return
 }
 
-func (c *CodeWars) readTerrains(w *model.World) {
-	idx := 0
+func (c *CodeWars) readTerrains() (terrains [][]codewars.TerrainType) {
 	for i := c.readInt(); i > 0; i-- {
+		var slice []codewars.TerrainType
 		for j := c.readInt(); j > 0; j-- {
-			w.Land[idx] = w.Land[idx] & ^(model.Land_Swamp | model.Land_Forest)
-			switch c.readByte() {
-			case byte(model.Terrain_Swamp):
-				w.Land[idx] |= model.Land_Swamp
-			case byte(model.Terrain_Forest):
-				w.Land[idx] |= model.Land_Forest
-			}
-			idx++
+			slice = append(slice, codewars.TerrainType(c.readByte()))
 		}
+		terrains = append(terrains, slice)
 	}
+	return
 }
 
-func (c *CodeWars) readFacility(fn func(id int64) *model.Facility) {
+func (c *CodeWars) readFacility(fn func(id int64) *runner.Facility) {
 	switch c.readByte() {
 	case 0, 127:
 		break
 	default:
 		f := fn(c.readInt64())
-		f.FacilityType = model.FacilityType(c.readByte())
+		f.FacilityType = runner.FacilityType(c.readByte())
 		f.OwnerPlayerId = c.readInt64()
 		f.Left = c.readFloat64()
 		f.Top = c.readFloat64()
 		f.CapturePoints = c.readFloat64()
-		f.VehicleType = model.VehicleType(c.readByte())
+		f.VehicleType = runner.VehicleType(c.readByte())
 		f.ProductionProgress = c.readInt()
 	}
 }
 
-func (c *CodeWars) readVehicleUpdate(fn func(id int64) *model.Vehicle) *model.Vehicle {
+func (c *CodeWars) readVehicleUpdate(fn func(id int64) *runner.Vehicle) *runner.Vehicle {
 	if c.readBool() {
 		v := fn(c.readInt64())
 		v.X = c.readFloat64()
@@ -316,7 +333,7 @@ func (c *CodeWars) readVehicleUpdate(fn func(id int64) *model.Vehicle) *model.Ve
 	return nil
 }
 
-func (c *CodeWars) readVehicle(fn func(id int64) *model.Vehicle) {
+func (c *CodeWars) readVehicle(fn func(id int64) *runner.Vehicle) {
 	if c.readBool() {
 		v := fn(c.readInt64())
 		v.X = c.readFloat64()
@@ -338,14 +355,14 @@ func (c *CodeWars) readVehicle(fn func(id int64) *model.Vehicle) {
 		v.AerialDefence = c.readInt()
 		v.AttackCooldownTicks = c.readInt()
 		v.RemainingAttackCooldownTicks = c.readInt()
-		v.VehicleType = model.VehicleType(c.readByte())
+		v.Type = runner.VehicleType(c.readByte())
 		v.Aerial = c.readBool()
 		v.Selected = c.readBool()
 		v.Groups = c.readIntArray()
 	}
 }
 
-func (c *CodeWars) readVehiclesUpdate(w *model.World) {
+func (c *CodeWars) readVehiclesUpdate(w *runner.World) {
 	w.Updates = w.Updates[:0]
 	for l := c.readInt(); l > 0; l-- {
 		if v := c.readVehicleUpdate(w.Vehicle); v != nil {
@@ -354,19 +371,19 @@ func (c *CodeWars) readVehiclesUpdate(w *model.World) {
 	}
 }
 
-func (c *CodeWars) readFacilities(w *model.World) {
+func (c *CodeWars) readFacilities(w *runner.World) {
 	for l := c.readInt(); l > 0; l-- {
 		c.readFacility(w.Facility)
 	}
 }
 
-func (c *CodeWars) readVehicles(w *model.World) {
+func (c *CodeWars) readVehicles(w *runner.World) {
 	for l := c.readInt(); l > 0; l-- {
 		c.readVehicle(w.Vehicle)
 	}
 }
 
-func (c *CodeWars) readPlayers(w *model.World) {
+func (c *CodeWars) readPlayers(w *runner.World) {
 	for l := c.readInt(); l > 0; l-- {
 		c.readPlayer(w.Player)
 	}

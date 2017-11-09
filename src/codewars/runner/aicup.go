@@ -1,4 +1,4 @@
-package codewars
+package runner
 
 import (
 	"bufio"
