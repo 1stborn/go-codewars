@@ -263,6 +263,7 @@ func (c *CodeWars) writeMove(m *Move) {
 		c.writeFloat64(m.X)
 		c.writeFloat64(m.Y)
 		c.writeFloat64(m.Angle)
+		c.writeFloat64(m.Factor)
 		c.writeFloat64(m.MaxSpeed)
 		c.writeFloat64(m.MaxAngularSpeed)
 		c.writeByte(byte(m.Type))
