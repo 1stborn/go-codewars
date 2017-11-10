@@ -20,56 +20,56 @@ const (
 	/**
 	 * Ничего не делать.
 	 */
-	No ActionType = iota
+	Action_None ActionType = iota
 
 	/**
 	 * Пометить юнитов, соответствующих некоторым параметрам, как выделенных.
 	 * При этом, со всех остальных юнитов выделение снимается.
 	 * Юниты других игроков автоматически исключаются из выделения.
 	 */
-	ClearAndSelect
+	Action_ClearAndSelect
 
 	/**
 	 * Пометить юнитов, соответствующих некоторым параметрам, как выделенных.
 	 * При этом, выделенные ранее юниты остаются выделенными.
 	 * Юниты других игроков автоматически исключаются из выделения.
 	 */
-	AddToSelection
+	Action_AddToSelection
 
 	/**
 	 * Снять выделение с юнитов, соответствующих некоторым параметрам.
 	 */
-	Deselect
+	Action_Deselect
 
 	/**
 	 * Установить для выделенных юнитов принадлежность к группе.
 	 */
-	Assign
+	Action_Assign
 
 	/**
 	 * Убрать у выделенных юнитов принадлежность к группе.
 	 */
-	Dismiss
+	Action_Dismiss
 
 	/**
 	 * Расформировать группу.
 	 */
-	Disband
+	Action_Disband
 
 	/**
 	 * Приказать выделенным юнитам меремещаться в указанном направлении.
 	 */
-	Run
+	Action_Move
 
 	/**
 	 * Приказать выделенным юнитам поворачиваться относительно некоторой точки.
 	 */
-	Rotate
+	Action_Rotate
 
 	/**
 	 * Настроить производство нужного типа техники на заводе ({@code FacilityType.VEHICLE_FACTORY}).
 	 */
-	SetupVehicleProduction
+	Action_SetupVehicleProduction
 )
 
 /**
@@ -81,17 +81,17 @@ const (
 	/**
 	 * Равнина.
 	 */
-	Plain Terrain = iota
+	Terrain_Plain Terrain = iota
 
 	/**
 	 * Топь.
 	 */
-	Swamp
+	Terrain_Swamp
 
 	/**
 	 * Лес.
 	 */
-	Forest
+	Terrain_Forest
 )
 
 /**
@@ -103,17 +103,17 @@ const (
 	/**
 	 * Ясно.
 	 */
-	Clear Weather = iota
+	Weather_Clear Weather = iota
 
 	/**
 	 * Плотные облака.
 	 */
-	Cloud
+	Weather_Cloud
 
 	/**
 	 * Сильный дождь.
 	 */
-	Rain
+	Weather_Rain
 )
 
 /**
@@ -122,32 +122,32 @@ const (
 type VehicleType uint8
 
 const (
-	Any VehicleType = 255
+	Vehicle_None VehicleType = 255
 	/**
 	 * Бронированная ремонтно-эвакуационная машина. Наземный юнит.
 	 * Постепенно восстанавливает прочность находящейся поблизости неподвижной техники.
 	 */
-	Arrv VehicleType = iota
+	Vehicle_Arrv VehicleType = iota
 
 	/**
 	 * Истребитель. Воздушный юнит. Крайне эффективен против другой воздушной техники. Не может атаковать наземные цели.
 	 */
-	Fighter
+	Vehicle_Fighter
 
 	/**
 	 * Ударный вертолёт. Воздушный юнит. Может атаковать как воздушные, так и наземные цели.
 	 */
-	Helicopter
+	Vehicle_Helicopter
 
 	/**
 	 * Боевая машина пехоты. Наземный юнит. Может атаковать как воздушные, так и наземные цели.
 	 */
-	Ifv
+	Vehicle_Ifv
 
 	/**
 	 * Танк. Наземный юнит. Крайне эффективен против другой наземной техники. Также может атаковать воздушные цели.
 	 */
-	Tank
+	Vehicle_Tank
 )
 
 /**
@@ -160,10 +160,10 @@ const (
 	 * Центр управления. Увеличивает возможное количество действий игрока на
 	 * {@code game.AdditionalActionCountPerControlCenter} за {@code game.actionDetectionInterval} игровых тиков.
 	 */
-	ControlCenter FacilityType = iota
+	Facility_ControlCenter FacilityType = iota
 
 	/**
 	 * Завод. Может производить технику любого типа по выбору игрока.
 	 */
-	VehicleFactory
+	Facility_VehicleFactory
 )

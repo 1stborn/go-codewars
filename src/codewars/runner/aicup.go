@@ -3,12 +3,10 @@ package runner
 import (
 	"bufio"
 	"encoding/binary"
-	"errors"
 	"net"
 )
 
 var ByteOrder = binary.LittleEndian
-var ErrWrongType = errors.New("wrong message type")
 
 type AiCup struct {
 	conn   net.Conn
@@ -26,19 +24,19 @@ func (c *AiCup) Dial(host, port string) (err error) {
 }
 
 func (c *AiCup) writeToken(token string) {
-	c.writeOpcode(AuthenticationToken)
+	c.writeOpcode(Message_AuthenticationToken)
 	c.writeString(token)
 	c.flush()
 }
 
 func (c *AiCup) writeProtoVersion(ver int) {
-	c.writeOpcode(ProtocolVersion)
+	c.writeOpcode(Message_ProtocolVersion)
 	c.writeInt(ver)
 	c.flush()
 }
 
 func (c *AiCup) ReadTeamSize() int {
-	c.ensureMessageType(TeamSize)
+	c.ensureMessageType(Message_TeamSize)
 	return c.readInt()
 }
 
@@ -53,7 +51,7 @@ func (c *AiCup) readOpcode() MessageType {
 func (c *AiCup) readIntArray() []int {
 	var arr []int
 	if ln := c.readInt(); ln > 0 {
-		for ; ln >= 0; ln-- {
+		for ; ln > 0; ln-- {
 			arr = append(arr, c.readInt())
 		}
 	}

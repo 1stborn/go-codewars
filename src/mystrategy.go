@@ -1,17 +1,13 @@
 package main
 
-import (
-	. "codewars"
-	"codewars/runner"
-)
-
-func main() {
-	runner.Start(&MyStrategy{})
-}
+import . "codewars"
 
 type MyStrategy struct {
 }
 
-func (m *MyStrategy) Move(*Player, *World, *Game, *Move) {
+func New() *MyStrategy {
+	return new(MyStrategy)
+}
 
+func (m *MyStrategy) Move(player *Player, world *World, game *Game, move *Move) {
 }
