@@ -68,92 +68,92 @@ type Game struct {
 	TerrainWeatherMapRowCount int
 	/**
 	 * Мультипликатор радиуса обзора наземной техники, находящейся на равнинной местности
-	 * ({@code TerrainType.PLAIN}).
+	 * ({@code Terrain.PLAIN}).
 	 */
 	PlainTerrainVisionFactor float64
 	/**
 	 * Мультипликатор радиуса обзора любой техники при обнаружении наземной техники противника,
-	 * находящейся на равнинной местности ({@code TerrainType.PLAIN}).
+	 * находящейся на равнинной местности ({@code Terrain.PLAIN}).
 	 */
 	PlainTerrainStealthFactor float64
 	/**
 	 * Мультипликатор максимальной скорости наземной техники, находящейся на равнинной местности
-	 * ({@code TerrainType.PLAIN}).
+	 * ({@code Terrain.PLAIN}).
 	 */
 	PlainTerrainSpeedFactor float64
 	/**
 	 * Мультипликатор радиуса обзора наземной техники, находящейся в болотистой местности
-	 * ({@code TerrainType.SWAMP}).
+	 * ({@code Terrain.SWAMP}).
 	 */
 	SwampTerrainVisionFactor float64
 	/**
 	 * Мультипликатор радиуса обзора любой техники при обнаружении наземной техники противника,
-	 * находящейся в болотистой местности ({@code TerrainType.SWAMP}).
+	 * находящейся в болотистой местности ({@code Terrain.SWAMP}).
 	 */
 	SwampTerrainStealthFactor float64
 	/**
 	 * Мультипликатор максимальной скорости наземной техники, находящейся в болотистой местности
-	 * ({@code TerrainType.SWAMP}).
+	 * ({@code Terrain.SWAMP}).
 	 */
 	SwampTerrainSpeedFactor float64
 	/**
 	 * Мультипликатор радиуса обзора наземной техники, находящейся в лесистой местности
-	 * ({@code TerrainType.FOREST}).
+	 * ({@code Terrain.FOREST}).
 	 */
 	ForestTerrainVisionFactor float64
 	/**
 	 * Мультипликатор радиуса обзора любой техники при обнаружении наземной техники противника,
-	 * находящейся в лесистой местности ({@code TerrainType.FOREST}).
+	 * находящейся в лесистой местности ({@code Terrain.FOREST}).
 	 */
 	ForestTerrainStealthFactor float64
 	/**
 	 * Мультипликатор максимальной скорости наземной техники, находящейся в лесистой местности
-	 * ({@code TerrainType.FOREST}).
+	 * ({@code Terrain.FOREST}).
 	 */
 	ForestTerrainSpeedFactor float64
 	/**
 	 * Мультипликатор радиуса обзора воздушной техники, находящейся в области ясной погоды
-	 * ({@code WeatherType.CLEAR}).
+	 * ({@code Weather.CLEAR}).
 	 */
 	ClearWeatherVisionFactor float64
 	/**
 	 * Мультипликатор радиуса обзора любой техники при обнаружении воздушной техники противника,
-	 * находящейся в области ясной погоды ({@code WeatherType.CLEAR}).
+	 * находящейся в области ясной погоды ({@code Weather.CLEAR}).
 	 */
 	ClearWeatherStealthFactor float64
 	/**
 	 * Мультипликатор максимальной скорости воздушной техники, находящейся в области ясной погоды
-	 * ({@code WeatherType.CLEAR}).
+	 * ({@code Weather.CLEAR}).
 	 */
 	ClearWeatherSpeedFactor float64
 	/**
 	 * Мультипликатор радиуса обзора воздушной техники, находящейся в плотных облаках
-	 * ({@code WeatherType.CLOUD}).
+	 * ({@code Weather.CLOUD}).
 	 */
 	CloudWeatherVisionFactor float64
 	/**
 	 * Мультипликатор радиуса обзора любой техники при обнаружении воздушной техники противника,
-	 * находящейся в плотных облаках ({@code WeatherType.CLOUD}).
+	 * находящейся в плотных облаках ({@code Weather.CLOUD}).
 	 */
 	CloudWeatherStealthFactor float64
 	/**
 	 * Мультипликатор максимальной скорости воздушной техники, находящейся в плотных облаках
-	 * ({@code WeatherType.CLOUD}).
+	 * ({@code Weather.CLOUD}).
 	 */
 	CloudWeatherSpeedFactor float64
 	/**
 	 * Мультипликатор радиуса обзора воздушной техники, находящейся в условиях сильного дождя
-	 * ({@code WeatherType.RAIN}).
+	 * ({@code Weather.RAIN}).
 	 */
 	RainWeatherVisionFactor float64
 	/**
 	 * Мультипликатор радиуса обзора любой техники при обнаружении воздушной техники противника,
-	 * находящейся в условиях сильного дождя ({@code WeatherType.RAIN}).
+	 * находящейся в условиях сильного дождя ({@code Weather.RAIN}).
 	 */
 	RainWeatherStealthFactor float64
 	/**
 	 * Мультипликатор максимальной скорости воздушной техники, находящейся в условиях сильного дождя
-	 * ({@code WeatherType.RAIN}).
+	 * ({@code Weather.RAIN}).
 	 */
 	RainWeatherSpeedFactor float64
 	/**

@@ -39,8 +39,8 @@ type World struct {
 	 */
 	VehicleUpdates []*VehicleUpdate
 
-	TerrainByCellXY [][]TerrainType
-	WeatherByCellXY [][]WeatherType
+	TerrainByCellXY [][]Terrain
+	WeatherByCellXY [][]Weather
 
 	/**
 	 * Список сооружений (в случайном порядке).

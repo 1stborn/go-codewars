@@ -49,8 +49,8 @@ type CodeWars struct {
 	players    map[int64]*codewars.Player
 	facilities map[int64]*codewars.Facility
 
-	terrainByCellXY [][]codewars.TerrainType
-	weatherByCellXY [][]codewars.WeatherType
+	terrainByCellXY [][]codewars.Terrain
+	weatherByCellXY [][]codewars.Weather
 }
 
 func Start(s Strategy) {
@@ -81,8 +81,8 @@ func Start(s Strategy) {
 
 				if err != ErrGameOver {
 					m := new(codewars.Move)
-					m.VehicleType = codewars.Vehicle_None
-					m.Action = codewars.Action_None
+					m.VehicleType = codewars.Any
+					m.Action = codewars.No
 
 					s.Move(p, w, g, m)
 					cli.writeMove(m)
@@ -293,11 +293,11 @@ func (c *CodeWars) writeMove(m *codewars.Move) {
 	c.flush()
 }
 
-func (c *CodeWars) readWeather() (weather [][]codewars.WeatherType) {
+func (c *CodeWars) readWeather() (weather [][]codewars.Weather) {
 	for i := c.readInt(); i > 0; i-- {
-		var slice []codewars.WeatherType
+		var slice []codewars.Weather
 		for j := c.readInt(); j > 0; j-- {
-			slice = append(slice, codewars.WeatherType(c.readByte()))
+			slice = append(slice, codewars.Weather(c.readByte()))
 		}
 		weather = append(weather, slice)
 	}
@@ -305,11 +305,11 @@ func (c *CodeWars) readWeather() (weather [][]codewars.WeatherType) {
 	return
 }
 
-func (c *CodeWars) readTerrains() (terrain [][]codewars.TerrainType) {
+func (c *CodeWars) readTerrains() (terrain [][]codewars.Terrain) {
 	for i := c.readInt(); i > 0; i-- {
-		var slice []codewars.TerrainType
+		var slice []codewars.Terrain
 		for j := c.readInt(); j > 0; j-- {
-			slice = append(slice, codewars.TerrainType(c.readByte()))
+			slice = append(slice, codewars.Terrain(c.readByte()))
 		}
 		terrain = append(terrain, slice)
 	}

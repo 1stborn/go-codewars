@@ -20,109 +20,100 @@ const (
 	/**
 	 * Ничего не делать.
 	 */
-	Action_None ActionType = iota
+	No ActionType = iota
 
 	/**
 	 * Пометить юнитов, соответствующих некоторым параметрам, как выделенных.
 	 * При этом, со всех остальных юнитов выделение снимается.
 	 * Юниты других игроков автоматически исключаются из выделения.
 	 */
-	Action_ClearAndSelect
+	ClearAndSelect
 
 	/**
 	 * Пометить юнитов, соответствующих некоторым параметрам, как выделенных.
 	 * При этом, выделенные ранее юниты остаются выделенными.
 	 * Юниты других игроков автоматически исключаются из выделения.
 	 */
-	Action_AddToSelection
+	AddToSelection
 
 	/**
 	 * Снять выделение с юнитов, соответствующих некоторым параметрам.
 	 */
-	Action_Deselect
+	Deselect
 
 	/**
 	 * Установить для выделенных юнитов принадлежность к группе.
 	 */
-	Action_Assign
+	Assign
 
 	/**
 	 * Убрать у выделенных юнитов принадлежность к группе.
 	 */
-	Action_Dismiss
+	Dismiss
 
 	/**
 	 * Расформировать группу.
 	 */
-	Action_Disband
+	Disband
 
 	/**
 	 * Приказать выделенным юнитам меремещаться в указанном направлении.
 	 */
-	Action_Move
+	Run
 
 	/**
 	 * Приказать выделенным юнитам поворачиваться относительно некоторой точки.
 	 */
-	Action_Rotate
+	Rotate
 
 	/**
 	 * Настроить производство нужного типа техники на заводе ({@code FacilityType.VEHICLE_FACTORY}).
 	 */
-	Action_SetupVehicleProduction
+	SetupVehicleProduction
 )
 
 /**
  * Тип местности.
  */
-type TerrainType byte
+type Terrain byte
 
 const (
 	/**
 	 * Равнина.
 	 */
-	Terrain_Plain TerrainType = iota
+	Plain Terrain = iota
 
 	/**
 	 * Топь.
 	 */
-	Terrain_Swamp
+	Swamp
 
 	/**
 	 * Лес.
 	 */
-	Terrain_Forest
+	Forest
 )
 
 /**
  * Тип погоды.
  */
-type WeatherType byte
+type Weather byte
 
 const (
 	/**
 	 * Ясно.
 	 */
-	Weather_Clear WeatherType = iota
+	Clear Weather = iota
 
 	/**
 	 * Плотные облака.
 	 */
-	Weather_Cloud
+	Cloud
 
 	/**
 	 * Сильный дождь.
 	 */
-	Weather_Rain
-)
-
-type LandType byte
-
-const (
-	Land_Swamp LandType = 1 << iota
-	Land_Forest
-	Land_Cloud
-	Land_Rain
+	Rain
 )
 
 /**
@@ -131,32 +122,32 @@ const (
 type VehicleType uint8
 
 const (
-	Vehicle_None VehicleType = 255
+	Any VehicleType = 255
 	/**
 	 * Бронированная ремонтно-эвакуационная машина. Наземный юнит.
 	 * Постепенно восстанавливает прочность находящейся поблизости неподвижной техники.
 	 */
-	Vehicle_Arrv VehicleType = iota
+	Arrv VehicleType = iota
 
 	/**
 	 * Истребитель. Воздушный юнит. Крайне эффективен против другой воздушной техники. Не может атаковать наземные цели.
 	 */
-	Vehicle_Fighter
+	Fighter
 
 	/**
 	 * Ударный вертолёт. Воздушный юнит. Может атаковать как воздушные, так и наземные цели.
 	 */
-	Vehicle_Helicopter
+	Helicopter
 
 	/**
 	 * Боевая машина пехоты. Наземный юнит. Может атаковать как воздушные, так и наземные цели.
 	 */
-	Vehicle_Ifv
+	Ifv
 
 	/**
 	 * Танк. Наземный юнит. Крайне эффективен против другой наземной техники. Также может атаковать воздушные цели.
 	 */
-	Vehicle_Tank
+	Tank
 )
 
 /**
@@ -169,10 +160,10 @@ const (
 	 * Центр управления. Увеличивает возможное количество действий игрока на
 	 * {@code game.AdditionalActionCountPerControlCenter} за {@code game.actionDetectionInterval} игровых тиков.
 	 */
-	Facility_ControlCenter FacilityType = iota
+	ControlCenter FacilityType = iota
 
 	/**
 	 * Завод. Может производить технику любого типа по выбору игрока.
 	 */
-	Facility_VehicleFactory
+	VehicleFactory
 )
