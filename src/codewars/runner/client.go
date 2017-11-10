@@ -18,7 +18,7 @@ const (
 	Message_Move
 )
 
-const Version int = 1
+const Version int = 2
 
 var (
 	ErrGameOver  = errors.New("game over")
@@ -77,7 +77,7 @@ func Start(s Strategy) {
 		w := new(World)
 
 		for cli.readContext(p, w) != ErrGameOver {
-			m := &Move{Type: Vehicle_None}
+			m := &Move{Type: Vehicle_None, Action:Action_None, Factor: 1.0}
 
 			s.Move(p, w, g, m)
 

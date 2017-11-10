@@ -67,6 +67,11 @@ const (
 	Action_Rotate
 
 	/**
+	 * Масштабировать формацию выделенных юнитов относительно указанной точки.
+	 */
+	Action_Scale
+
+	/**
 	 * Настроить производство нужного типа техники на заводе ({@code FacilityType.VEHICLE_FACTORY}).
 	 */
 	Action_SetupVehicleProduction
