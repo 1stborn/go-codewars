@@ -382,11 +382,18 @@ func (c *CodeWars) readVehiclesUpdate() (updates []*VehicleUpdate) {
 }
 
 func (c *CodeWars) readFacilities() (facilities []*Facility) {
-	for l := c.readInt(); l > 0; l-- {
-		if f := c.readFacility(); f != nil {
+	if l := c.readInt(); l > 0 {
+		for ; l > 0; l-- {
+			if f := c.readFacility(); f != nil {
+				facilities = append(facilities, f)
+			}
+		}
+	} else {
+		for _, f := range c.facilities {
 			facilities = append(facilities, f)
 		}
 	}
+
 	return
 }
 
@@ -400,10 +407,17 @@ func (c *CodeWars) readVehicles() (vehicles []*Vehicle) {
 }
 
 func (c *CodeWars) readPlayers() (players []*Player) {
-	for l := c.readInt(); l > 0; l-- {
-		if p := c.readPlayer(); p != nil {
+	if l := c.readInt(); l > 0 {
+		for ; l > 0; l-- {
+			if p := c.readPlayer(); p != nil {
+				players = append(players, p)
+			}
+		}
+	} else {
+		for _, p := range c.players {
 			players = append(players, p)
 		}
 	}
+
 	return
 }
