@@ -126,8 +126,9 @@ const (
  */
 type VehicleType uint8
 
+const Vehicle_None VehicleType = 255
+
 const (
-	Vehicle_None VehicleType = 255
 	/**
 	 * Бронированная ремонтно-эвакуационная машина. Наземный юнит.
 	 * Постепенно восстанавливает прочность находящейся поблизости неподвижной техники.
