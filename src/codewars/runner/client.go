@@ -198,7 +198,9 @@ func (c *CodeWars) readContext(p *Player, w *World) error {
 		return ErrGameOver
 	case Message_PlayerContext:
 		if c.readBool() {
-			*p = *c.readPlayer()
+			if me := c.readPlayer(); me != nil {
+				*p = *me
+			}
 			c.readWorld(w)
 		}
 		return nil
