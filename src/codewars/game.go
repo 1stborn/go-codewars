@@ -393,4 +393,25 @@ type Game struct {
 	 * Высота сооружения.
 	 */
 	FacilityHeight float64
+	/**
+	 * Минимально возможный интервал между двумя последовательными тактическими ядерными ударами
+	 */
+	BaseTacticalNuclearStrikeCooldown int
+	/**
+	 * Уменьшение интервала между тактическими ядерными ударами за каждый захваченный центр
+	 */
+	TacticalNuclearStrikeCooldownDecreasePerControlCenter int
+
+	/**
+	 * Урон тактического ядерного удара в центре взрыва.
+	 */
+	MaxTacticalNuclearStrikeDamage float64
+	/**
+	 *  Радиус взрыва тактического ядерного удара.
+	 */
+	TacticalNuclearStrikeRadius float64
+	/**
+	 * Задержка между запросом нанесения тактического ядерного удара и собственно самим нанесением.
+	 */
+	TacticalNuclearStrikeDelay int
 }

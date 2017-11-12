@@ -75,6 +75,11 @@ const (
 	 * Настроить производство нужного типа техники на заводе ({@code FacilityType.VEHICLE_FACTORY}).
 	 */
 	Action_SetupVehicleProduction
+
+	/**
+	 * Запросить тактический ядерный удар.
+	 */
+	Action_TacticalNuclearStrike
 )
 
 /**

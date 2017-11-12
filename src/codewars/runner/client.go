@@ -18,7 +18,7 @@ const (
 	Message_Move
 )
 
-const Version int = 2
+const Version int = 3
 
 var (
 	ErrGameOver  = errors.New("game over")
@@ -77,7 +77,13 @@ func Start(s Strategy) {
 		w := new(World)
 
 		for cli.readContext(p, w) != ErrGameOver {
-			m := &Move{Type: Vehicle_None, Action:Action_None, Factor: 1.0}
+			m := &Move{
+				Type:       Vehicle_None,
+				Action:     Action_None,
+				Factor:     1,
+				FacilityId: -1,
+				VehicleId:  -1,
+			}
 
 			s.Move(p, w, g, m)
 
@@ -97,95 +103,100 @@ func (c *CodeWars) readGame() *Game {
 
 	if c.readBool() {
 		return &Game{
-			RandomSeed:                             c.readInt64(),
-			TickCount:                              c.readInt(),
-			WorldWidth:                             c.readFloat64(),
-			WorldHeight:                            c.readFloat64(),
-			FogOfWarEnabled:                        c.readBool(),
-			VictoryScore:                           c.readInt(),
-			FacilityCaptureScore:                   c.readInt(),
-			VehicleEliminationScore:                c.readInt(),
-			ActionDetectionInterval:                c.readInt(),
-			BaseActionCount:                        c.readInt(),
-			AdditionalActionCountPerControlCenter:  c.readInt(),
-			MaxUnitGroup:                           c.readInt(),
-			TerrainWeatherMapColumnCount:           c.readInt(),
-			TerrainWeatherMapRowCount:              c.readInt(),
-			PlainTerrainVisionFactor:               c.readFloat64(),
-			PlainTerrainStealthFactor:              c.readFloat64(),
-			PlainTerrainSpeedFactor:                c.readFloat64(),
-			SwampTerrainVisionFactor:               c.readFloat64(),
-			SwampTerrainStealthFactor:              c.readFloat64(),
-			SwampTerrainSpeedFactor:                c.readFloat64(),
-			ForestTerrainVisionFactor:              c.readFloat64(),
-			ForestTerrainStealthFactor:             c.readFloat64(),
-			ForestTerrainSpeedFactor:               c.readFloat64(),
-			ClearWeatherVisionFactor:               c.readFloat64(),
-			ClearWeatherStealthFactor:              c.readFloat64(),
-			ClearWeatherSpeedFactor:                c.readFloat64(),
-			CloudWeatherVisionFactor:               c.readFloat64(),
-			CloudWeatherStealthFactor:              c.readFloat64(),
-			CloudWeatherSpeedFactor:                c.readFloat64(),
-			RainWeatherVisionFactor:                c.readFloat64(),
-			RainWeatherStealthFactor:               c.readFloat64(),
-			RainWeatherSpeedFactor:                 c.readFloat64(),
-			VehicleRadius:                          c.readFloat64(),
-			TankDurability:                         c.readInt(),
-			TankSpeed:                              c.readFloat64(),
-			TankVisionRange:                        c.readFloat64(),
-			TankGroundAttackRange:                  c.readFloat64(),
-			TankAerialAttackRange:                  c.readFloat64(),
-			TankGroundDamage:                       c.readInt(),
-			TankAerialDamage:                       c.readInt(),
-			TankGroundDefence:                      c.readInt(),
-			TankAerialDefence:                      c.readInt(),
-			TankAttackCooldownTicks:                c.readInt(),
-			TankProductionCost:                     c.readInt(),
-			IFVDurability:                          c.readInt(),
-			IFVSpeed:                               c.readFloat64(),
-			IFVVisionRange:                         c.readFloat64(),
-			IFVGroundAttackRange:                   c.readFloat64(),
-			IFVAerialAttackRange:                   c.readFloat64(),
-			IFVGroundDamage:                        c.readInt(),
-			IFVAerialDamage:                        c.readInt(),
-			IFVGroundDefence:                       c.readInt(),
-			IFVAerialDefence:                       c.readInt(),
-			IFVAttackCooldownTicks:                 c.readInt(),
-			IFVProductionCost:                      c.readInt(),
-			ARRVDurability:                         c.readInt(),
-			ARRVSpeed:                              c.readFloat64(),
-			ARRVVisionRange:                        c.readFloat64(),
-			ARRVGroundDefence:                      c.readInt(),
-			ARRVAerialDefence:                      c.readInt(),
-			ARRVProductionCost:                     c.readInt(),
-			ARRVRepairRange:                        c.readFloat64(),
-			ARRVRepairSpeed:                        c.readFloat64(),
-			HelicopterDurability:                   c.readInt(),
-			HelicopterSpeed:                        c.readFloat64(),
-			HelicopterVisionRange:                  c.readFloat64(),
-			HelicopterGroundAttackRange:            c.readFloat64(),
-			HelicopterAerialAttackRange:            c.readFloat64(),
-			HelicopterGroundDamage:                 c.readInt(),
-			HelicopterAerialDamage:                 c.readInt(),
-			HelicopterGroundDefence:                c.readInt(),
-			HelicopterAerialDefence:                c.readInt(),
-			HelicopterAttackCooldownTicks:          c.readInt(),
-			HelicopterProductionCost:               c.readInt(),
-			FighterDurability:                      c.readInt(),
-			FighterSpeed:                           c.readFloat64(),
-			FighterVisionRange:                     c.readFloat64(),
-			FighterGroundAttackRange:               c.readFloat64(),
-			FighterAerialAttackRange:               c.readFloat64(),
-			FighterGroundDamage:                    c.readInt(),
-			FighterAerialDamage:                    c.readInt(),
-			FighterGroundDefence:                   c.readInt(),
-			FighterAerialDefence:                   c.readInt(),
-			FighterAttackCooldownTicks:             c.readInt(),
-			FighterProductionCost:                  c.readInt(),
-			MaxFacilityCapturePoints:               c.readFloat64(),
-			FacilityCapturePointsPerVehiclePerTick: c.readFloat64(),
-			FacilityWidth:                          c.readFloat64(),
-			FacilityHeight:                         c.readFloat64(),
+			RandomSeed:                                            c.readInt64(),
+			TickCount:                                             c.readInt(),
+			WorldWidth:                                            c.readFloat64(),
+			WorldHeight:                                           c.readFloat64(),
+			FogOfWarEnabled:                                       c.readBool(),
+			VictoryScore:                                          c.readInt(),
+			FacilityCaptureScore:                                  c.readInt(),
+			VehicleEliminationScore:                               c.readInt(),
+			ActionDetectionInterval:                               c.readInt(),
+			BaseActionCount:                                       c.readInt(),
+			AdditionalActionCountPerControlCenter:                 c.readInt(),
+			MaxUnitGroup:                                          c.readInt(),
+			TerrainWeatherMapColumnCount:                          c.readInt(),
+			TerrainWeatherMapRowCount:                             c.readInt(),
+			PlainTerrainVisionFactor:                              c.readFloat64(),
+			PlainTerrainStealthFactor:                             c.readFloat64(),
+			PlainTerrainSpeedFactor:                               c.readFloat64(),
+			SwampTerrainVisionFactor:                              c.readFloat64(),
+			SwampTerrainStealthFactor:                             c.readFloat64(),
+			SwampTerrainSpeedFactor:                               c.readFloat64(),
+			ForestTerrainVisionFactor:                             c.readFloat64(),
+			ForestTerrainStealthFactor:                            c.readFloat64(),
+			ForestTerrainSpeedFactor:                              c.readFloat64(),
+			ClearWeatherVisionFactor:                              c.readFloat64(),
+			ClearWeatherStealthFactor:                             c.readFloat64(),
+			ClearWeatherSpeedFactor:                               c.readFloat64(),
+			CloudWeatherVisionFactor:                              c.readFloat64(),
+			CloudWeatherStealthFactor:                             c.readFloat64(),
+			CloudWeatherSpeedFactor:                               c.readFloat64(),
+			RainWeatherVisionFactor:                               c.readFloat64(),
+			RainWeatherStealthFactor:                              c.readFloat64(),
+			RainWeatherSpeedFactor:                                c.readFloat64(),
+			VehicleRadius:                                         c.readFloat64(),
+			TankDurability:                                        c.readInt(),
+			TankSpeed:                                             c.readFloat64(),
+			TankVisionRange:                                       c.readFloat64(),
+			TankGroundAttackRange:                                 c.readFloat64(),
+			TankAerialAttackRange:                                 c.readFloat64(),
+			TankGroundDamage:                                      c.readInt(),
+			TankAerialDamage:                                      c.readInt(),
+			TankGroundDefence:                                     c.readInt(),
+			TankAerialDefence:                                     c.readInt(),
+			TankAttackCooldownTicks:                               c.readInt(),
+			TankProductionCost:                                    c.readInt(),
+			IFVDurability:                                         c.readInt(),
+			IFVSpeed:                                              c.readFloat64(),
+			IFVVisionRange:                                        c.readFloat64(),
+			IFVGroundAttackRange:                                  c.readFloat64(),
+			IFVAerialAttackRange:                                  c.readFloat64(),
+			IFVGroundDamage:                                       c.readInt(),
+			IFVAerialDamage:                                       c.readInt(),
+			IFVGroundDefence:                                      c.readInt(),
+			IFVAerialDefence:                                      c.readInt(),
+			IFVAttackCooldownTicks:                                c.readInt(),
+			IFVProductionCost:                                     c.readInt(),
+			ARRVDurability:                                        c.readInt(),
+			ARRVSpeed:                                             c.readFloat64(),
+			ARRVVisionRange:                                       c.readFloat64(),
+			ARRVGroundDefence:                                     c.readInt(),
+			ARRVAerialDefence:                                     c.readInt(),
+			ARRVProductionCost:                                    c.readInt(),
+			ARRVRepairRange:                                       c.readFloat64(),
+			ARRVRepairSpeed:                                       c.readFloat64(),
+			HelicopterDurability:                                  c.readInt(),
+			HelicopterSpeed:                                       c.readFloat64(),
+			HelicopterVisionRange:                                 c.readFloat64(),
+			HelicopterGroundAttackRange:                           c.readFloat64(),
+			HelicopterAerialAttackRange:                           c.readFloat64(),
+			HelicopterGroundDamage:                                c.readInt(),
+			HelicopterAerialDamage:                                c.readInt(),
+			HelicopterGroundDefence:                               c.readInt(),
+			HelicopterAerialDefence:                               c.readInt(),
+			HelicopterAttackCooldownTicks:                         c.readInt(),
+			HelicopterProductionCost:                              c.readInt(),
+			FighterDurability:                                     c.readInt(),
+			FighterSpeed:                                          c.readFloat64(),
+			FighterVisionRange:                                    c.readFloat64(),
+			FighterGroundAttackRange:                              c.readFloat64(),
+			FighterAerialAttackRange:                              c.readFloat64(),
+			FighterGroundDamage:                                   c.readInt(),
+			FighterAerialDamage:                                   c.readInt(),
+			FighterGroundDefence:                                  c.readInt(),
+			FighterAerialDefence:                                  c.readInt(),
+			FighterAttackCooldownTicks:                            c.readInt(),
+			FighterProductionCost:                                 c.readInt(),
+			MaxFacilityCapturePoints:                              c.readFloat64(),
+			FacilityCapturePointsPerVehiclePerTick:                c.readFloat64(),
+			FacilityWidth:                                         c.readFloat64(),
+			FacilityHeight:                                        c.readFloat64(),
+			BaseTacticalNuclearStrikeCooldown:                     c.readInt(),
+			TacticalNuclearStrikeCooldownDecreasePerControlCenter: c.readInt(),
+			MaxTacticalNuclearStrikeDamage:                        c.readFloat64(),
+			TacticalNuclearStrikeRadius:                           c.readFloat64(),
+			TacticalNuclearStrikeDelay:                            c.readInt(),
 		}
 	}
 
@@ -222,6 +233,11 @@ func (c *CodeWars) readPlayer() *Player {
 		p.StrategyCrashed = c.readBool()
 		p.Score = c.readInt()
 		p.RemainingActionCooldownTicks = c.readInt()
+		p.RemainingNuclearStrikeCooldownTicks = c.readInt()
+		p.NextNuclearStrikeVehicleId = c.readInt64()
+		p.NextNuclearStrikeTickIndex = c.readInt()
+		p.NextNuclearStrikeX = c.readFloat64()
+		p.NextNuclearStrikeY = c.readFloat64()
 
 		c.players[p.Id] = p
 
@@ -270,6 +286,7 @@ func (c *CodeWars) writeMove(m *Move) {
 		c.writeFloat64(m.MaxAngularSpeed)
 		c.writeByte(byte(m.Type))
 		c.writeInt64(m.FacilityId)
+		c.writeInt64(m.VehicleId)
 	}
 
 	c.flush()

@@ -31,4 +31,25 @@ type Player struct {
 	 * Если значение равно {@code 0}, игрок может совершить действие в данный тик.
 	 */
 	RemainingActionCooldownTicks int
+	/**
+	 * Количество тиков, оставшееся до следующего тактического ядерного удара.
+	 * Если значение равно {@code 0}, игрок может запросить удар в данный тик.
+	 */
+	RemainingNuclearStrikeCooldownTicks int
+	/**
+	 * Идентификатор техники, осуществляющей наведение ядерного удара на цель или {@code -1}.
+	 */
+	NextNuclearStrikeVehicleId int64
+	/**
+	 * Тик нанесения следующего ядерного удара или {@code -1}.
+	 */
+	NextNuclearStrikeTickIndex int
+	/**
+	 * Абсцисса цели следующего ядерного удара или {@code -1.0}.
+	 */
+	NextNuclearStrikeX float64
+	/**
+	 * Ордината цели следующего ядерного удара или {@code -1.0}.
+	 */
+	NextNuclearStrikeY float64
 }
