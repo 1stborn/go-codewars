@@ -401,11 +401,10 @@ type Game struct {
 	 * Уменьшение интервала между тактическими ядерными ударами за каждый захваченный центр
 	 */
 	TacticalNuclearStrikeCooldownDecreasePerControlCenter int
-
 	/**
 	 * Урон тактического ядерного удара в центре взрыва.
 	 */
-	MaxTacticalNuclearStrikeDamage float64
+	TacticalNuclearStrikeMaxDamage float64
 	/**
 	 *  Радиус взрыва тактического ядерного удара.
 	 */

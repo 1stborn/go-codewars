@@ -194,7 +194,7 @@ func (c *CodeWars) readGame() *Game {
 			FacilityHeight:                                        c.readFloat64(),
 			BaseTacticalNuclearStrikeCooldown:                     c.readInt(),
 			TacticalNuclearStrikeCooldownDecreasePerControlCenter: c.readInt(),
-			MaxTacticalNuclearStrikeDamage:                        c.readFloat64(),
+			TacticalNuclearStrikeMaxDamage:                        c.readFloat64(),
 			TacticalNuclearStrikeRadius:                           c.readFloat64(),
 			TacticalNuclearStrikeDelay:                            c.readInt(),
 		}
