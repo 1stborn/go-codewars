@@ -1,6 +1,6 @@
 package main
 
-import ."model/client"
+import ."client"
 
 func main() {
 	Start(New())
