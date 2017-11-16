@@ -1,6 +1,6 @@
 package main
 
-import ."codewars/client"
+import ."model/client"
 
 func main() {
 	Start(New())

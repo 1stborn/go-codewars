@@ -1,4 +1,4 @@
-package codewars
+package model
 
 /**
  * Содержит данные о текущем состоянии игрока.

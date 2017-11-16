@@ -1,7 +1,7 @@
 package client
 
 import (
-	. "codewars"
+	. "model"
 	"errors"
 	"net"
 	"bufio"

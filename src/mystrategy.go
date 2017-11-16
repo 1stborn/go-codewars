@@ -1,6 +1,6 @@
 package main
 
-import . "codewars"
+import . "model"
 
 type MyStrategy struct {
 }
