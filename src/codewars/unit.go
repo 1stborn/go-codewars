@@ -2,17 +2,8 @@ package codewars
 
 import "math"
 
-type CircularUnit struct {
-	Unit
-	/**
-	* Радиус объекта.
-	 */
-	Radius float64
-}
 
-func (c *CircularUnit) GetRadius() float64 {
-	return c.Radius
-}
+
 
 /**
  * Базовый класс для определения объектов (<<юнитов>>) на игровом поле.

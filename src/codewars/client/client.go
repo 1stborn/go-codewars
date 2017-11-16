@@ -1,10 +1,15 @@
-package runner
+package client
 
 import (
 	. "codewars"
 	"errors"
+	"net"
+	"bufio"
+	"encoding/binary"
 	"os"
 )
+
+var ByteOrder = binary.LittleEndian
 
 type MessageType byte
 
@@ -25,25 +30,10 @@ var (
 	ErrWrongType = errors.New("wrong message type")
 )
 
-/**
- * Стратегия --- интерфейс, содержащий описание методов искусственного интеллекта армии.
- * Каждая пользовательская стратегия должна реализовывать этот интерфейс.
- * Может отсутствовать в некоторых языковых пакетах, если язык не поддерживает интерфейсы.
- */
-type Strategy interface {
-	/**
-		 * Основной метод стратегии, осуществляющий управление армией. Вызывается каждый тик.
-		 *
-	     * me    Информация о вашем игроке.
-	     * world Текущее состояние мира.
-	     * game  Различные игровые константы.
-	     * move  Результатом работы метода является изменение полей данного объекта.
-	*/
-	Move(*Player, *World, *Game, *Move)
-}
-
-type CodeWars struct {
-	*AiCup
+type RemoteProcessClient struct {
+	conn   net.Conn
+	reader *bufio.Reader
+	writer *bufio.Writer
 
 	players    map[int64]*Player
 	facilities map[int64]*Facility
@@ -58,8 +48,7 @@ func Start(s Strategy) {
 		host, port, token = "127.0.0.1", "31001", "0000000000000000"
 	}
 
-	cli := &CodeWars{
-		AiCup:      new(AiCup),
+	cli := &RemoteProcessClient{
 		players:    make(map[int64]*Player),
 		facilities: make(map[int64]*Facility),
 	}
@@ -73,10 +62,9 @@ func Start(s Strategy) {
 
 		g := cli.readGame()
 
-		p := new(Player)
-		w := new(World)
+		pc := &PlayerContext{Player: new(Player), World: new(World)}
 
-		for cli.readContext(p, w) != ErrGameOver {
+		for cli.readContext(pc) != ErrGameOver {
 			m := &Move{
 				Type:       Vehicle_None,
 				Action:     Action_None,
@@ -85,7 +73,7 @@ func Start(s Strategy) {
 				VehicleId:  -1,
 			}
 
-			s.Move(p, w, g, m)
+			s.Move(pc.Player, pc.World, g, m)
 
 			cli.writeMove(m)
 		}
@@ -98,7 +86,7 @@ func Start(s Strategy) {
 	}
 }
 
-func (c *CodeWars) readGame() *Game {
+func (c *RemoteProcessClient) readGame() *Game {
 	c.ensureMessageType(Message_GameContext)
 
 	if c.readBool() {
@@ -203,16 +191,16 @@ func (c *CodeWars) readGame() *Game {
 	return nil
 }
 
-func (c *CodeWars) readContext(p *Player, w *World) error {
+func (c *RemoteProcessClient) readContext(pc *PlayerContext) error {
 	switch c.readOpcode() {
 	case Message_GameOver:
 		return ErrGameOver
 	case Message_PlayerContext:
 		if c.readBool() {
 			if me := c.readPlayer(); me != nil {
-				*p = *me
+				*pc.Player = *me
 			}
-			c.readWorld(w)
+			c.readWorld(pc.World)
 		}
 		return nil
 	default:
@@ -220,7 +208,7 @@ func (c *CodeWars) readContext(p *Player, w *World) error {
 	}
 }
 
-func (c *CodeWars) readPlayer() *Player {
+func (c *RemoteProcessClient) readPlayer() *Player {
 	switch c.readByte() {
 	case 0:
 		return nil
@@ -245,7 +233,7 @@ func (c *CodeWars) readPlayer() *Player {
 	}
 }
 
-func (c *CodeWars) readWorld(w *World) {
+func (c *RemoteProcessClient) readWorld(w *World) {
 	if c.readBool() {
 		w.TickIndex = c.readInt()
 		w.TickCount = c.readInt()
@@ -264,7 +252,7 @@ func (c *CodeWars) readWorld(w *World) {
 	}
 }
 
-func (c *CodeWars) writeMove(m *Move) {
+func (c *RemoteProcessClient) writeMove(m *Move) {
 	c.writeOpcode(Message_Move)
 
 	if m == nil {
@@ -292,7 +280,7 @@ func (c *CodeWars) writeMove(m *Move) {
 	c.flush()
 }
 
-func (c *CodeWars) readWeather() (weather [][]Weather) {
+func (c *RemoteProcessClient) readWeather() (weather [][]Weather) {
 	for i := c.readInt(); i > 0; i-- {
 		var slice []Weather
 		for j := c.readInt(); j > 0; j-- {
@@ -304,7 +292,7 @@ func (c *CodeWars) readWeather() (weather [][]Weather) {
 	return
 }
 
-func (c *CodeWars) readTerrains() (terrain [][]Terrain) {
+func (c *RemoteProcessClient) readTerrains() (terrain [][]Terrain) {
 	for i := c.readInt(); i > 0; i-- {
 		var slice []Terrain
 		for j := c.readInt(); j > 0; j-- {
@@ -315,7 +303,7 @@ func (c *CodeWars) readTerrains() (terrain [][]Terrain) {
 	return
 }
 
-func (c *CodeWars) readFacility() *Facility {
+func (c *RemoteProcessClient) readFacility() *Facility {
 	switch c.readByte() {
 	case 0:
 		return nil
@@ -338,7 +326,7 @@ func (c *CodeWars) readFacility() *Facility {
 	}
 }
 
-func (c *CodeWars) readVehicleUpdate() *VehicleUpdate {
+func (c *RemoteProcessClient) readVehicleUpdate() *VehicleUpdate {
 	if c.readBool() {
 		v := new(VehicleUpdate)
 		v.Id = c.readInt64()
@@ -355,7 +343,7 @@ func (c *CodeWars) readVehicleUpdate() *VehicleUpdate {
 	return nil
 }
 
-func (c *CodeWars) readNewVehicle() *Vehicle {
+func (c *RemoteProcessClient) readNewVehicle() *Vehicle {
 	if c.readBool() {
 		v := new(Vehicle)
 		v.Id = c.readInt64()
@@ -389,7 +377,7 @@ func (c *CodeWars) readNewVehicle() *Vehicle {
 	return nil
 }
 
-func (c *CodeWars) readVehiclesUpdate() (updates []*VehicleUpdate) {
+func (c *RemoteProcessClient) readVehiclesUpdate() (updates []*VehicleUpdate) {
 	for l := c.readInt(); l > 0; l-- {
 		if v := c.readVehicleUpdate(); v != nil {
 			updates = append(updates, v)
@@ -398,7 +386,7 @@ func (c *CodeWars) readVehiclesUpdate() (updates []*VehicleUpdate) {
 	return
 }
 
-func (c *CodeWars) readFacilities() (facilities []*Facility) {
+func (c *RemoteProcessClient) readFacilities() (facilities []*Facility) {
 	if l := c.readInt(); l > 0 {
 		for ; l > 0; l-- {
 			if f := c.readFacility(); f != nil {
@@ -414,7 +402,7 @@ func (c *CodeWars) readFacilities() (facilities []*Facility) {
 	return
 }
 
-func (c *CodeWars) readVehicles() (vehicles []*Vehicle) {
+func (c *RemoteProcessClient) readVehicles() (vehicles []*Vehicle) {
 	for l := c.readInt(); l > 0; l-- {
 		if v := c.readNewVehicle(); v != nil {
 			vehicles = append(vehicles, v)
@@ -423,7 +411,7 @@ func (c *CodeWars) readVehicles() (vehicles []*Vehicle) {
 	return
 }
 
-func (c *CodeWars) readPlayers() (players []*Player) {
+func (c *RemoteProcessClient) readPlayers() (players []*Player) {
 	if l := c.readInt(); l > 0 {
 		for ; l > 0; l-- {
 			if p := c.readPlayer(); p != nil {
@@ -437,4 +425,159 @@ func (c *CodeWars) readPlayers() (players []*Player) {
 	}
 
 	return
+}
+
+func (c *RemoteProcessClient) Dial(host, port string) (err error) {
+	if c.conn, err = net.Dial("tcp", host+":"+port); err == nil {
+		c.reader = bufio.NewReader(c.conn)
+		c.writer = bufio.NewWriter(c.conn)
+	}
+
+	return
+}
+
+func (c *RemoteProcessClient) writeToken(token string) {
+	c.writeOpcode(Message_AuthenticationToken)
+	c.writeString(token)
+	c.flush()
+}
+
+func (c *RemoteProcessClient) writeProtoVersion(ver int) {
+	c.writeOpcode(Message_ProtocolVersion)
+	c.writeInt(ver)
+	c.flush()
+}
+
+func (c *RemoteProcessClient) ReadTeamSize() int {
+	c.ensureMessageType(Message_TeamSize)
+	return c.readInt()
+}
+
+func (c *RemoteProcessClient) Close() error {
+	return c.conn.Close()
+}
+
+func (c *RemoteProcessClient) readOpcode() MessageType {
+	return MessageType(c.readByte())
+}
+
+func (c *RemoteProcessClient) readIntArray() []int {
+	var arr []int
+	if ln := c.readInt(); ln > 0 {
+		for ; ln > 0; ln-- {
+			arr = append(arr, c.readInt())
+		}
+	}
+	return arr
+}
+
+func (c *RemoteProcessClient) readInt() int {
+	var v int32
+	if err := binary.Read(c.reader, ByteOrder, &v); err != nil {
+		panic(err)
+	}
+	return int(v)
+}
+
+func (c *RemoteProcessClient) readInt64() int64 {
+	var v int64
+	if err := binary.Read(c.reader, ByteOrder, &v); err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (c *RemoteProcessClient) readFloat64() float64 {
+	var v float64
+	if err := binary.Read(c.reader, ByteOrder, &v); err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (c *RemoteProcessClient) writeBool(b bool) {
+	if b {
+		c.writeByte(1)
+	} else {
+		c.writeByte(0)
+	}
+}
+
+func (c *RemoteProcessClient) readBool() bool {
+	return c.readByte() != 0
+}
+
+func (c *RemoteProcessClient) readByte() byte {
+	b, err := c.reader.ReadByte()
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+func (c *RemoteProcessClient) readString() string {
+	return string(c.readBytes())
+}
+
+func (c *RemoteProcessClient) ensureMessageType(m MessageType) {
+	if b, err := c.reader.ReadByte(); err != nil || b != byte(m) {
+		panic(ErrWrongType)
+	}
+}
+
+func (c *RemoteProcessClient) writeOpcode(m MessageType) {
+	c.writeByte(byte(m))
+}
+
+func (c *RemoteProcessClient) writeInt(v int) {
+	if err := binary.Write(c.writer, ByteOrder, int32(v)); err != nil {
+		panic(err)
+	}
+}
+
+func (c *RemoteProcessClient) writeFloat64(v float64) {
+	if err := binary.Write(c.writer, ByteOrder, v); err != nil {
+		panic(err)
+	}
+}
+
+func (c *RemoteProcessClient) writeInt64(v int64) {
+	if err := binary.Write(c.writer, ByteOrder, v); err != nil {
+		panic(err)
+	}
+}
+
+func (c *RemoteProcessClient) readBytes() []byte {
+	l := c.readInt()
+	r := make([]byte, l)
+	for i := range r {
+		r[i] = c.readByte()
+	}
+	return r
+}
+
+func (c *RemoteProcessClient) writeByte(v byte) {
+	if err := c.writer.WriteByte(v); err != nil {
+		panic(err)
+	}
+}
+
+func (c *RemoteProcessClient) writeBytes(v []byte) {
+	c.writeInt(len(v))
+	if _, err := c.writer.Write(v); err != nil {
+		panic(err)
+	}
+}
+
+func (c *RemoteProcessClient) writeString(v string) {
+	c.writeInt(len(v))
+	if _, err := c.writer.WriteString(v); err != nil {
+		panic(err)
+	}
+}
+
+func (c *RemoteProcessClient) flush() {
+	if err := c.writer.Flush(); err != nil {
+		panic(err)
+	}
 }

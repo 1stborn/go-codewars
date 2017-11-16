@@ -1,10 +1,5 @@
 package codewars
 
-type PlayerContext struct {
-	*Player
-	*World
-}
-
 /**
  * Содержит данные о текущем состоянии игрока.
  */
