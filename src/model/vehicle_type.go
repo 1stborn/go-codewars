@@ -34,4 +34,3 @@ const (
 	 */
 	Vehicle_Tank
 )
-
