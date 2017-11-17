@@ -1,11 +1,11 @@
-package client
+package main
 
 import (
-	. "model"
-	"errors"
-	"net"
 	"bufio"
 	"encoding/binary"
+	"errors"
+	. "model"
+	"net"
 	"os"
 )
 
